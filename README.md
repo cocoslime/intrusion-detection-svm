@@ -1,5 +1,8 @@
-# intrusion-detection-svm
+# Intrusion-Detection-SVM
 Intrusion Detection Algorithm - SVM and Enhanced SVM
+
+# Author
+Dong-min Kim, Pusan National University
 
 # Description
 This is python project to detect network intrusion by using svm and enhanced svm.
