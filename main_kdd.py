@@ -1,8 +1,11 @@
 import pandas as pd
+import numpy as np
+
+sample_number = 300000
 
 if __name__ == '__main__':
     # load data
-    data = pd.read_csv('data/kddcup.data.corrected')
+    data = pd.read_csv('data/kddcup.data_10_percent_corrected')
     featureNameArray = pd.read_csv('data/kddcup.names.txt', header=None).values.ravel()
 
     data.columns = featureNameArray
@@ -12,33 +15,35 @@ if __name__ == '__main__':
     data = encoder.encode(data)
 
     from preprocessing.KDD import filter
-    data = filter(data, 0.05)
-    data = data.sample(frac = 0.5)
+    data = filter(data, 0.015)
+    data = data.sample(300000)
     X = data.iloc[:, 0:data.shape[1] - 1].values
     y = data.loc[:, "type"].values
 
     # construct test data 1, 2(split)
     from sklearn.model_selection import train_test_split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3)
+    X_train, X_test_data, y_train, y_test_data = train_test_split(X, y, test_size=100000)
 
-    X_test_1, X_test_2, y_test_1, y_test_2 = train_test_split(X_test, y_test, test_size=.5)
-
+    X_test_1, X_test_2, y_test_1, y_test_2 = train_test_split(X_test_data, y_test_data, test_size=50000)
+    X_test_list = [X_test_1,X_test_2]
+    y_test_list = [y_test_1, y_test_2];
 
     # construct test data 3
     test_data = pd.read_csv('data/corrected')
     test_data.columns = featureNameArray
-    test_data = test_data.sample(frac=0.3)
+    test_data = test_data.sample(10000)
     test_data = encoder.encode(test_data)
-    X_test_3 = test_data.iloc[:, 0:test_data.shape[1] - 1].values
-    y_test_3 = test_data.loc[:, "type"].values
+    temp_x = test_data.iloc[:, 0:test_data.shape[1] - 1].values
+    X_test_list.append(temp_x);
+    y_test_list.append(test_data.loc[:, "type"].values);
 
     print("---------------")
     print("train : ", len(X_train))
-    print("test 1 : ", len(X_test_1))
-    print("test 2 : ", len(X_test_2))
-    print("test 3 : ", len(X_test_3))
+    for index in range(0, len(X_test_list)) :
+        print("test %d : %s" % (index, len(X_test_list[index])))
 
     # Conventional SVM
+    print("------Conventional Training Start-----")
     from svm.conventionalSVM import ConventionalSVM
     csvm = ConventionalSVM()
     csvm.train(X_train, y_train)
@@ -48,14 +53,13 @@ if __name__ == '__main__':
     # Conventional test
     from printer import printResult
 
-    csvm_predictions = csvm.test(X_test_1)
-    printResult(y_test_1, csvm_predictions)
+    for index in range(0, len(X_test_list)):
+        csvm_predictions = csvm.test(X_test_list[index])
+        printResult(y_test_list[index], csvm_predictions)
 
-    csvm_predictions = csvm.test(X_test_2)
-    printResult(y_test_2, csvm_predictions)
-
-    csvm_predictions = csvm.test(X_test_3)
-    printResult(y_test_3, csvm_predictions)
+    print("------Conventional Test Done-----")
 
     # Enhanced SVM
-
+    print("------Enhanced Training Start-----")
+    from preprocessing.RoughSet import RoughSet
+    RoughSet().getReducts(data);
