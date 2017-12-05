@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 
-sample_number = 300000
+sample_number = 100000
+sample_test_ratio = 0.20
 
 if __name__ == '__main__':
     # load data
@@ -15,16 +16,16 @@ if __name__ == '__main__':
     data = encoder.encode(data)
 
     from preprocessing.KDD import filter
-    data = filter(data, 0.015)
-    data = data.sample(300000)
+    data = filter(data, 0.05)
+    data = data.sample(sample_number)
     X = data.iloc[:, 0:data.shape[1] - 1].values
     y = data.loc[:, "type"].values
 
     # construct test data 1, 2(split)
     from sklearn.model_selection import train_test_split
-    X_train, X_test_data, y_train, y_test_data = train_test_split(X, y, test_size=100000)
+    X_train, X_test_data, y_train, y_test_data = train_test_split(X, y, test_size=sample_test_ratio)
 
-    X_test_1, X_test_2, y_test_1, y_test_2 = train_test_split(X_test_data, y_test_data, test_size=50000)
+    X_test_1, X_test_2, y_test_1, y_test_2 = train_test_split(X_test_data, y_test_data, test_size=0.5)
     X_test_list = [X_test_1,X_test_2]
     y_test_list = [y_test_1, y_test_2];
 
